@@ -70,6 +70,9 @@ class _FuzzyState extends State<Fuzzy> {
         spoil = false;
         text_sucess = 'Bravo, la similarité est de $ratio_rate% !';
       });
+      if (ratio_rate > 99) {
+        _nextPush();
+      }
     } else {
       setState(() {
         text_fail = 'La similarité n\'est que de $ratio_rate%, try again !';
@@ -97,6 +100,7 @@ class _FuzzyState extends State<Fuzzy> {
       solution = false;
       sucess = false;
       next = false;
+      _controller.clear();
     });
     if (index == sub_fr_learning.length - 1) {
       setState(() {
