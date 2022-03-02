@@ -36,7 +36,7 @@ class _TrouverState extends State<Trouver> {
   late List list_en_learning = import_list_sync(file_en_learning, folderPath);
   late int nb_learn = list_en_learning.length;
   int nb_notlearn = 0;
-  int min_nb_word = 12;
+  late int min_nb_word = nb_batch;
   //ids
   String values_learning = '';
   String values_notlearn = '';
@@ -241,15 +241,15 @@ class _TrouverState extends State<Trouver> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (need_sauvegarde)
-                  ElevatedButton(
-                      onPressed: (sub_index > 0) ? saveData : null,
-                      child: Text('Sauvegarder mes choix')),
-                if (!need_sauvegarde)
-                  ElevatedButton(
-                      onPressed:
-                          ((nb_learn >= min_nb_word)) ? pushApprendre : null,
-                      child: Text('Apprendre mes $nb_learn mots')),
+                // if (need_sauvegarde)
+                //   ElevatedButton(
+                //       onPressed: (sub_index > 0) ? saveData : null,
+                //       child: Text('Sauvegarder mes choix')),
+                ElevatedButton(
+                    onPressed:
+                        ((nb_learn >= min_nb_word)) ? pushApprendre : null,
+                    child:
+                        Text('Apprendre mes $nb_learn mots (min: $nb_batch)')),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

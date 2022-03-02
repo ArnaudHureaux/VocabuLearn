@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dart:math';
 
 import '1_home.dart';
 import '2_2_quizz.dart';
@@ -21,7 +22,7 @@ class _PaireState extends State<Paire> {
   _PaireState(this.folderPath);
   //settings
   late List<String> liste_settings = import_setting_sync(folderPath);
-  late int nb_batch = int.parse(liste_settings[1]);
+  late int nb_batch = min(int.parse(liste_settings[1]), en_learning.length);
   //others
   bool is_red = false;
   int click_count = 0;

@@ -357,7 +357,7 @@ class _HomeState extends State<Home> {
               AlertDialog(
                 title: Text("Pas assez de mots à apprendre"),
                 content: Text(
-                    "Sélectionnez au moins 12 mots à apprendre avant de lancer les modules d'apprentissage."),
+                    "Sélectionnez au moins 6 mots à apprendre avant de lancer les modules d'apprentissage ou de consulter vos mots."),
                 actions: [
                   TextButton(
                     child: Text("Sélectionner des mots"),
@@ -366,8 +366,8 @@ class _HomeState extends State<Home> {
                 ],
               ),
             //ElevatedButton(onPressed: restart, child: Text('Restart')),
-            // ElevatedButton(
-            //     onPressed: reintializeAllFiles, child: Text('Reinitialize')),
+            ElevatedButton(
+                onPressed: reintializeAllFiles, child: Text('Reinitialize')),
           ],
         ),
       ),

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -24,6 +26,19 @@ class _SettingsState extends State<Settings> {
   late bool step_3 = (liste_settings[11] == 'true');
   //others
   int nb_actions = 0;
+  late List en_learning = import_list_sync(file_en_learning, folderPath);
+  //fonction intermédiaire
+  _filter_list(List<String> list, int max_int) {
+    max_int = max(max_int, 6);
+    List<String> output = [];
+    for (var i = 0; i < list.length; i++) {
+      int int_element = int.parse(list[i]);
+      if (int_element < max_int) {
+        output.add(list[i]);
+      }
+    }
+    return output;
+  }
 
   //fonctions finales
   liste_deroulantes_batch(newValue) {
@@ -110,9 +125,9 @@ class _SettingsState extends State<Settings> {
       '2/3: Jeu des Quizz',
       '3/3: Traduction directes',
     ];
-    List<List<String>> values = [
-      ['6', '9', '12', '15', '18', '21']
-    ];
+    List<String> values1 = ['6', '9', '12', '15', '18', '21'];
+    List<List<String>> values = [];
+    values.add(_filter_list(values1, en_learning.length));
     values.add(List.generate(nb_batch - 3, (i) => (i + 3).toString()));
     values.add(['60', '70', '75', '80', '82', '85', '87', '90', '95', '100']);
     List<String> current_values = [

@@ -21,10 +21,15 @@ create_setting() async {
         'nb_batch,6,nb_questions,5,similarity_threshold,80,step_1,true,step_2,true,step_3,true,difficulty,2');
   }
   List<String> lines = file.readAsLinesSync();
-  List<String> content_list = lines[0].split(',');
-  if (content_list.length < 14) {
+  if (lines.length == 0) {
     await file.writeAsString(
         'nb_batch,6,nb_questions,5,similarity_threshold,80,step_1,true,step_2,true,step_3,true,difficulty,2');
+  } else {
+    List<String> content_list = lines[0].split(',');
+    if (content_list.length < 14) {
+      await file.writeAsString(
+          'nb_batch,6,nb_questions,5,similarity_threshold,80,step_1,true,step_2,true,step_3,true,difficulty,2');
+    }
   }
 }
 
