@@ -1,3 +1,4 @@
+import 'package:VocabuLearn/2_4_1_sort_multi.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -8,16 +9,16 @@ import '2_3_fuzzy.dart';
 import '_global_functions.dart';
 import '_global_variables.dart';
 
-class Sort extends StatefulWidget {
+class SortOne extends StatefulWidget {
   final folderPath;
-  Sort(this.folderPath);
+  SortOne(this.folderPath);
   @override
-  _SortState createState() => _SortState(this.folderPath);
+  _SortOneState createState() => _SortOneState(this.folderPath);
 }
 
-class _SortState extends State<Sort> {
+class _SortOneState extends State<SortOne> {
   final folderPath;
-  _SortState(this.folderPath);
+  _SortOneState(this.folderPath);
 
   //settings
   late List<String> liste_settings = import_setting_sync(folderPath);
@@ -25,13 +26,13 @@ class _SortState extends State<Sort> {
   //others
   int index = -1;
   List _informations = [
-    'Cela signifie que ces mots vous seront reproposés la prochaine fois que lancerez un apprentissage.',
-    'Cela signifie que ces mots seront mis à la fin de votre liste de mots à apprendre actuelle, et vous serons reproposés plus tard.',
-    'Cela signifie que ces mots seront considérés comme appris et qu\'il ne vous seront plus proposés.'
+    'Cela signifie que ce mot vous sera reproposé la prochaine fois que lancerez un apprentissage.',
+    'Cela signifie que ce mot sera mis à la fin de votre liste de mots à apprendre actuelle, et vous sera reproposé plus tard.',
+    'Cela signifie que ce mot sera considéré comme appris et qu\'il ne vous sera plus proposé.'
   ];
   bool display_info = false;
   List texts = [
-    'Continuer à les apprendre',
+    'Continuer à l\'apprendre',
     '   Réapprendre plus tard  ',
     '  Classer comme appris  '
   ];
@@ -43,14 +44,31 @@ class _SortState extends State<Sort> {
   String file_fr_learning = get_file_fr_learning();
   String file_fr_learned = get_file_fr_learned();
   // words
-  late List<String> en_learning =
+  late List<String> en_raw_learning =
       import_list_sync(file_en_learning, folderPath);
-  late List<String> fr_learning =
+  late List<String> fr_raw_learning =
       import_list_sync(file_fr_learning, folderPath);
+  late List<List<String>> new_lists =
+      remove_empty(en_raw_learning, fr_raw_learning);
+  late List<String> en_learning = new_lists[0];
+  late List<String> fr_learning = new_lists[1];
+
   late List<String> sub_fr_learning =
       process(fr_learning.getRange(0, nb_batch).toList());
   late List<String> sub_en_learning =
       process(en_learning.getRange(0, nb_batch).toList());
+
+  late List<String> en_raw_learned =
+      import_list_sync(file_en_learned, folderPath);
+  late List<String> fr_raw_learned =
+      import_list_sync(file_fr_learned, folderPath);
+  late List<List<String>> new_lists2 =
+      remove_empty(en_raw_learned, fr_raw_learned);
+  late List<String> en_learned = new_lists2[0];
+  late List<String> fr_learned = new_lists2[1];
+  // index
+  late int number = 0;
+  late int number_max = sub_en_learning.length;
   //----fonctions intermédiaires intro ---------------------------------------
   import_list_async(file_name) async {
     final folder = await getApplicationDocumentsDirectory();
@@ -100,47 +118,87 @@ class _SortState extends State<Sort> {
     return new_string;
   }
 
+  // variables
+  late List<String> tronc_en_learning =
+      en_learning.getRange(nb_batch, en_learning.length).toList();
+  late List<String> tronc_fr_learning =
+      fr_learning.getRange(nb_batch, en_learning.length).toList();
+  late List<String> en_learning_start = [];
+  late List<String> fr_learning_start = [];
+  late List<String> en_learning_end = [];
+  late List<String> fr_learning_end = [];
+  late List<String> en_learned_start = [];
+  late List<String> fr_learned_start = [];
+
   //----fonctions finales-----------------------------------------------------
+
+  _continuer() {
+    setState(() {
+      en_learning_start.add(sub_en_learning[number]);
+      fr_learning_start.add(sub_fr_learning[number]);
+      number++;
+    });
+
+    if (number == number_max) {
+      _end();
+    }
+  }
+
+  _plus_tard() {
+    setState(() {
+      en_learning_end.add(sub_en_learning[number]);
+      fr_learning_end.add(sub_fr_learning[number]);
+      number++;
+    });
+
+    if (number == number_max) {
+      _end();
+    }
+  }
+
+  _appris() {
+    setState(() {
+      en_learned_start.add(sub_en_learning[number]);
+      fr_learned_start.add(sub_fr_learning[number]);
+      number++;
+    });
+
+    if (number == number_max) {
+      _end();
+    }
+  }
+
+  _end() {
+    String new_content_en_learned =
+        from_list_to_string([...en_learned_start, ...en_learned]);
+    String new_content_fr_learned =
+        from_list_to_string([...fr_learned_start, ...fr_learned]);
+    String new_content_en_learning = from_list_to_string(
+        [...en_learning_start, ...tronc_en_learning, ...en_learning_end]);
+    String new_content_fr_learning = from_list_to_string(
+        [...fr_learning_start, ...tronc_fr_learning, ...fr_learning_end]);
+    export_list(file_en_learned, new_content_en_learned);
+    export_list(file_fr_learned, new_content_fr_learned);
+    export_list(file_en_learning, new_content_en_learning);
+    export_list(file_fr_learning, new_content_fr_learning);
+    restart_SortOne();
+    go_to_home();
+  }
+
+  go_to_sort_multi() async {
+    final folder = await getApplicationDocumentsDirectory();
+    final folderPath = folder.path;
+    liste_settings[17] = "true";
+    save_settings(liste_settings, folderPath);
+    await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => SortMulti(folderPath)));
+  }
+
   get_info(i) {
     setState(() {
       index = i;
       display_info = true;
     });
-  }
-
-  _continuer() {
-    restart_sort();
-    go_to_home();
-  }
-
-  _plus_tard() {
-    List new_list_en = list_go_to_end(en_learning, nb_batch);
-    List new_list_fr = list_go_to_end(fr_learning, nb_batch);
-    String new_content_en = from_list_to_string(new_list_en);
-    String new_content_fr = from_list_to_string(new_list_fr);
-    export_list(file_en_learning, new_content_en);
-    export_list(file_fr_learning, new_content_fr);
-    restart_sort();
-    go_to_home();
-  }
-
-  _appris() async {
-    List learned_en = await import_list_async(file_en_learned);
-    List learned_fr = await import_list_async(file_fr_learned);
-    String new_content_en_learned = from_list_to_string(
-        [...en_learning.getRange(0, nb_batch).toList(), ...learned_en]);
-    String new_content_fr_learned = from_list_to_string(
-        [...fr_learning.getRange(0, nb_batch).toList(), ...learned_fr]);
-    export_list(file_en_learned, new_content_en_learned);
-    export_list(file_fr_learned, new_content_fr_learned);
-    List new_list_en = list_delete_start(en_learning, nb_batch);
-    List new_list_fr = list_delete_start(fr_learning, nb_batch);
-    String new_content_en = from_list_to_string(new_list_en);
-    String new_content_fr = from_list_to_string(new_list_fr);
-    export_list(file_en_learning, new_content_en);
-    export_list(file_fr_learning, new_content_fr);
-    restart_sort();
-    go_to_home();
   }
 
   Future<bool> _willPopCallback() async {
@@ -152,7 +210,7 @@ class _SortState extends State<Sort> {
   }
 
   //----fonction de debug-----------------------------------------------------
-  restart_sort() {
+  restart_SortOne() {
     setState(() {
       bool display_info = false;
       int index = -1;
@@ -168,12 +226,6 @@ class _SortState extends State<Sort> {
       Center(child: Text('FRENCH')),
       Center(child: Text('ENGLISH'))
     ]));
-    for (var i = 0; i < nb_batch; i++) {
-      children_table.add(TableRow(children: [
-        Center(child: Text(sub_fr_learning[i])),
-        Center(child: Text(sub_en_learning[i]))
-      ]));
-    }
     List functions = [
       [_continuer, _plus_tard, _appris],
       [() => get_info(0), () => get_info(1), () => get_info(2)]
@@ -232,19 +284,44 @@ class _SortState extends State<Sort> {
                               width: 300,
                               child: Card(
                                   child: Center(
-                                      child: Text(
-                                'Que faire de ces mots ?',
-                                style: TextStyle(fontSize: 20),
-                              )))),
-                          Table(
-                            textDirection: TextDirection.ltr,
-                            defaultVerticalAlignment:
-                                TableCellVerticalAlignment.bottom,
-                            border: TableBorder.all(
-                                width: 1.0, color: Colors.black),
-                            children: children_table,
+                                      child: (number < number_max)
+                                          ? Text(
+                                              'Que faire de ce mot ? (${number + 1}/$number_max)',
+                                              style: TextStyle(fontSize: 20),
+                                            )
+                                          : Text(
+                                              'Que faire de ce mot ? (${number}/$number_max)',
+                                              style: TextStyle(fontSize: 20),
+                                            )))),
+                          Row(
+                            children: [
+                              SizedBox(
+                                  height: 60,
+                                  width: 280,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(4.0)),
+                                    child: Center(
+                                      child: (number < number_max)
+                                          ? Text(
+                                              sub_en_learning[number] +
+                                                  ' : ' +
+                                                  sub_fr_learning[number],
+                                              style: TextStyle(fontSize: 15),
+                                            )
+                                          : Text(
+                                              sub_en_learning[number_max - 1] +
+                                                  ' : ' +
+                                                  sub_fr_learning[
+                                                      number_max - 1],
+                                              style: TextStyle(fontSize: 15),
+                                            ),
+                                    ),
+                                  )),
+                            ],
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           ),
-
                           ...children_columns,
                           if (display_info)
                             SizedBox(
@@ -268,12 +345,12 @@ class _SortState extends State<Sort> {
                                 ],
                               )),
                             ),
-                          // ElevatedButton(
-                          //     style: ElevatedButton.styleFrom(
-                          //       primary: Colors.orange,
-                          //     ),
-                          //     onPressed: go_to_home,
-                          //     child: Text('Skip'))
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.orange,
+                              ),
+                              onPressed: go_to_sort_multi,
+                              child: Text('Classer par paquet'))
                         ]))))));
   }
 }

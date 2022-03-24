@@ -63,7 +63,7 @@
         _submitPush
         _willPopCallback (Quizz(..))
 
-2_4_sort
+2_4_1_sort_multi
     INTER
         export_list
         go_to_home

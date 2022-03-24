@@ -98,7 +98,7 @@
         _submitPush
         _willPopCallback (Quizz(..))
 
-2_4_sort
+2_4_1_sort_multi
     INTER
         import_setting
         process

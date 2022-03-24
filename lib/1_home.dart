@@ -6,6 +6,8 @@ import "package:yaml/yaml.dart";
 import '2_account.dart';
 import '2_trouver.dart';
 import '2_settings.dart';
+import '2_4_2_sort_one.dart';
+import '2_4_1_sort_multi.dart';
 
 import '_global_functions.dart';
 import '_global_variables.dart';
@@ -146,7 +148,7 @@ class _HomeState extends State<Home> {
     List<String> lines = file.readAsLinesSync();
     if (lines.length == 0) {
       String content_str =
-          'nb_batch,6,nb_questions,5,similarity_threshold,80,step_1,true,step_2,true,step_3,true,difficulty,2';
+          'nb_batch,6,nb_questions,5,similarity_threshold,80,step_1,true,step_2,true,step_3,true,difficulty,2,nb_words_max,20';
       file.writeAsString(content_str);
       return content_str.split(',');
     } else {
@@ -198,15 +200,32 @@ class _HomeState extends State<Home> {
       display_popup = false;
     });
     create_all_files();
-    List all_brut = await http.API_import_list_of_list();
-    all_brut = await filter_list_of_list(
-        all_brut, file_learning, file_notlearn, file_learned);
-    List all_filter = await create_all_occ(all_brut);
-    setState(() {
-      loading = false;
-    });
-    got_to_trouver(all_brut, all_filter);
-    return;
+    //settings
+    List<String> liste_settings = await import_setting_async();
+    int nb_words_max = int.parse(liste_settings[15]);
+    //current number of words
+    List list_en_learning = await import_list_async(file_en_learning);
+    int nb_learning = list_en_learning.length;
+    List list_en_learned = await import_list_async(file_en_learned);
+    int nb_learned = list_en_learned.length;
+    int current_number = nb_learned + nb_learning;
+    if (current_number >= nb_words_max) {
+      setState(() {
+        loading = false;
+      });
+      go_to_pay(context);
+      return;
+    } else {
+      List all_brut = await http.API_import_list_of_list();
+      all_brut = await filter_list_of_list(
+          all_brut, file_learning, file_notlearn, file_learned);
+      List all_filter = await create_all_occ(all_brut);
+      setState(() {
+        loading = false;
+      });
+      got_to_trouver(all_brut, all_filter);
+      return;
+    }
   }
 
   pushApprendre() async {
@@ -226,13 +245,13 @@ class _HomeState extends State<Home> {
   pushAccount() async {
     create_all_files();
     List list_en_learning = await import_list_async('list_en_learning.txt');
-    if (list_en_learning.length < 1) {
-      setState(() {
-        display_popup = true;
-      });
-    } else {
-      go_to_account();
-    }
+    // if (list_en_learning.length < 1) {
+    //   setState(() {
+    //     display_popup = true;
+    //   });
+    // } else {
+    go_to_account();
+
     return;
   }
 
@@ -259,6 +278,8 @@ class _HomeState extends State<Home> {
     reinitializeFiles(file_learned);
     reinitializeFiles(file_en_learning);
     reinitializeFiles(file_fr_learning);
+    reinitializeFiles(file_en_learned);
+    reinitializeFiles(file_fr_learned);
     reinitializeFiles('settings.txt');
     restart_home();
   }

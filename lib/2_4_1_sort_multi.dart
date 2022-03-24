@@ -1,24 +1,27 @@
-import 'package:Vocabulearn/2_3_fuzzy.dart';
 import 'package:flutter/material.dart';
-import '_http_data.dart' as http;
-import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:fuzzywuzzy/fuzzywuzzy.dart';
-import '1_home.dart';
+import 'dart:io';
 
-class Sort extends StatefulWidget {
+import '1_home.dart';
+import '2_3_fuzzy.dart';
+import '2_4_2_sort_one.dart';
+
+import '_global_functions.dart';
+import '_global_variables.dart';
+
+class SortMulti extends StatefulWidget {
   final folderPath;
-  Sort(this.folderPath);
+  SortMulti(this.folderPath);
   @override
-  _SortState createState() => _SortState(this.folderPath);
+  _SortMultiState createState() => _SortMultiState(this.folderPath);
 }
 
-class _SortState extends State<Sort> {
+class _SortMultiState extends State<SortMulti> {
   final folderPath;
-  _SortState(this.folderPath);
+  _SortMultiState(this.folderPath);
 
   //settings
-  late List<String> liste_settings = import_setting_sync();
+  late List<String> liste_settings = import_setting_sync(folderPath);
   late int nb_batch = int.parse(liste_settings[1]);
   //others
   int index = -1;
@@ -35,55 +38,34 @@ class _SortState extends State<Sort> {
   ];
 
   //mots en
-  String file_en_learning = 'list_en_learning.txt';
-  String file_en_learned = 'list_en_learned.txt';
+  String file_en_learning = get_file_en_learning();
+  String file_en_learned = get_file_en_learned();
   //mots fr
-  String file_fr_learning = 'list_fr_learning.txt';
-  String file_fr_learned = 'list_fr_learned.txt';
+  String file_fr_learning = get_file_fr_learning();
+  String file_fr_learned = get_file_fr_learned();
   // words
-  late List<String> en_learning = import_list_sync(file_en_learning);
-  late List<String> fr_learning = import_list_sync(file_fr_learning);
+  late List<String> en_raw_learning =
+      import_list_sync(file_en_learning, folderPath);
+  late List<String> fr_raw_learning =
+      import_list_sync(file_fr_learning, folderPath);
+  late List<List<String>> new_lists =
+      remove_empty(en_raw_learning, fr_raw_learning);
+  late List<String> en_learning = new_lists[0];
+  late List<String> fr_learning = new_lists[1];
   late List<String> sub_fr_learning =
       process(fr_learning.getRange(0, nb_batch).toList());
   late List<String> sub_en_learning =
       process(en_learning.getRange(0, nb_batch).toList());
+
+  late List<String> en_raw_learned =
+      import_list_sync(file_en_learned, folderPath);
+  late List<String> fr_raw_learned =
+      import_list_sync(file_fr_learned, folderPath);
+  late List<List<String>> new_lists2 =
+      remove_empty(en_raw_learned, fr_raw_learned);
+  late List<String> en_learned = new_lists2[0];
+  late List<String> fr_learned = new_lists2[1];
   //----fonctions intermédiaires intro ---------------------------------------
-  import_setting_sync() {
-    final file = File('$folderPath/settings.txt');
-    List<String> lines = file.readAsLinesSync();
-    if (lines.length == 0) {
-      String content_str =
-          'nb_batch,6,nb_questions,5,similarity_threshold,80,step_1,true,step_2,true,step_3,true';
-      file.writeAsString(content_str);
-      return content_str.split(',');
-    } else {
-      List<String> content_list = lines[0].split(',');
-      return content_list;
-    }
-  }
-
-  process(list) {
-    for (var i = 0; i < list.length; i++) {
-      list[i] = list[i]
-          .replaceAll('/ ', '/')
-          .replaceAll('   ', ' ')
-          .replaceAll('  ', ' ');
-    }
-    return list;
-  }
-
-  shuffle(list) {
-    list.shuffle();
-    return list;
-  }
-
-  import_list_sync(file_name) {
-    final file = File('$folderPath/$file_name');
-    List<String> lines = file.readAsLinesSync();
-    String content = lines[0];
-    return content.split(',');
-  }
-
   import_list_async(file_name) async {
     final folder = await getApplicationDocumentsDirectory();
     final folderPath = folder.path;
@@ -132,11 +114,25 @@ class _SortState extends State<Sort> {
     return new_string;
   }
 
+  go_to_sort_one() async {
+    final folder = await getApplicationDocumentsDirectory();
+    final folderPath = folder.path;
+    liste_settings[17] = "false";
+    save_settings(liste_settings, folderPath);
+    await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SortOne(folderPath)));
+  }
+
   //----fonctions finales-----------------------------------------------------
   get_info(i) {
     setState(() {
+      if (i != index) {
+        display_info = true;
+      } else {
+        display_info = !display_info;
+      }
+      ;
       index = i;
-      display_info = true;
     });
   }
 
@@ -156,13 +152,11 @@ class _SortState extends State<Sort> {
     go_to_home();
   }
 
-  _appris() async {
-    List learned_en = await import_list_async(file_en_learned);
-    List learned_fr = await import_list_async(file_fr_learned);
+  _appris() {
     String new_content_en_learned = from_list_to_string(
-        [...en_learning.getRange(0, nb_batch).toList(), ...learned_en]);
+        [...en_learning.getRange(0, nb_batch).toList(), ...en_learned]);
     String new_content_fr_learned = from_list_to_string(
-        [...fr_learning.getRange(0, nb_batch).toList(), ...learned_fr]);
+        [...fr_learning.getRange(0, nb_batch).toList(), ...fr_learned]);
     export_list(file_en_learned, new_content_en_learned);
     export_list(file_fr_learned, new_content_fr_learned);
     List new_list_en = list_delete_start(en_learning, nb_batch);
@@ -220,7 +214,9 @@ class _SortState extends State<Sort> {
             height: 36,
             child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: index == i ? Colors.green : Colors.blue,
+                  primary: ((index == i) & (display_info))
+                      ? Colors.green
+                      : Colors.blue,
                   padding: EdgeInsets.zero,
                 ),
                 onPressed: (functions[1][i]),
@@ -276,7 +272,6 @@ class _SortState extends State<Sort> {
                                 width: 1.0, color: Colors.black),
                             children: children_table,
                           ),
-
                           ...children_columns,
                           if (display_info)
                             SizedBox(
@@ -300,12 +295,12 @@ class _SortState extends State<Sort> {
                                 ],
                               )),
                             ),
-                          // ElevatedButton(
-                          //     style: ElevatedButton.styleFrom(
-                          //       primary: Colors.orange,
-                          //     ),
-                          //     onPressed: go_to_home,
-                          //     child: Text('Skip'))
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.orange,
+                              ),
+                              onPressed: go_to_sort_one,
+                              child: Text('Classer mot par mot'))
                         ]))))));
   }
 }

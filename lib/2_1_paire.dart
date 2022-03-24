@@ -5,7 +5,8 @@ import 'dart:math';
 import '1_home.dart';
 import '2_2_quizz.dart';
 import '2_3_fuzzy.dart';
-import '2_4_sort.dart';
+import '2_4_2_sort_one.dart';
+import '2_4_1_sort_multi.dart';
 
 import '_global_functions.dart';
 import '_global_variables.dart';
@@ -37,10 +38,15 @@ class _PaireState extends State<Paire> {
   late List<bool> is_english = french_or_english();
   // words
   late List<String> ids_learning = import_list_sync(file_learning, folderPath);
-  late List<String> en_learning =
+  late List<String> en_raw_learning =
       import_list_sync(file_en_learning, folderPath);
-  late List<String> fr_learning =
+  late List<String> fr_raw_learning =
       import_list_sync(file_fr_learning, folderPath);
+  late List<List<String>> new_lists =
+      remove_empty(en_raw_learning, fr_raw_learning);
+  late List<String> en_learning = new_lists[0];
+  late List<String> fr_learning = new_lists[1];
+
   late List<String> sub_ids_learning =
       ids_learning.getRange(0, nb_batch).toList();
   late List<String> sub_en_learning =
@@ -147,6 +153,7 @@ class _PaireState extends State<Paire> {
     bool step_1 = (liste_settings[7] == 'true');
     bool step_2 = (liste_settings[9] == 'true');
     bool step_3 = (liste_settings[11] == 'true');
+    bool prefer_multi = (liste_settings[17] == 'true');
     if (step_2) {
       await Navigator.push(
           context, MaterialPageRoute(builder: (context) => Quizz(folderPath)));
@@ -154,12 +161,14 @@ class _PaireState extends State<Paire> {
     if (step_3) {
       await Navigator.push(
           context, MaterialPageRoute(builder: (context) => Fuzzy(folderPath)));
-    } else {
-      await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Sort(folderPath)));
     }
-    await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Quizz(folderPath)));
+    if (prefer_multi) {
+      await Navigator.push(context,
+          MaterialPageRoute(builder: (context) => SortMulti(folderPath)));
+    } else {
+      await Navigator.push(context,
+          MaterialPageRoute(builder: (context) => SortOne(folderPath)));
+    }
   }
 
   Future<bool> _willPopCallback() async {

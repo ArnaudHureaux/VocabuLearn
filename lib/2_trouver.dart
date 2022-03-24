@@ -3,6 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 import '1_home.dart';
+import '2_pay.dart';
 
 import '_global_functions.dart';
 import '_global_variables.dart';
@@ -26,6 +27,15 @@ class _TrouverState extends State<Trouver> {
   late List<String> liste_settings = import_setting_sync(folderPath);
   late int nb_batch = int.parse(liste_settings[1]);
   late int difficulty = int.parse(liste_settings[13]);
+  late int nb_words_max = int.parse(liste_settings[15]);
+  //current number of words
+  late List list_en_learning = import_list_sync(file_en_learning, folderPath);
+  late List list_en_learned = import_list_sync(file_en_learned, folderPath);
+  late List list_en_learning_count = remove_empty(list_en_learning);
+  late List list_en_learned_count = remove_empty(list_en_learned);
+  late int nb_learning = list_en_learning_count.length;
+  late int nb_learned = list_en_learned_count.length;
+  late int current_number = nb_learned + nb_learning;
 
   // pour gérer l'affichage
   int window = 10;
@@ -33,8 +43,6 @@ class _TrouverState extends State<Trouver> {
   bool need_sauvegarde = true;
   List<int> index_diff = List.filled(20, 0);
   int sub_index = 0;
-  late List list_en_learning = import_list_sync(file_en_learning, folderPath);
-  late int nb_learn = list_en_learning.length;
   int nb_notlearn = 0;
   late int min_nb_word = nb_batch;
   //ids
@@ -58,6 +66,11 @@ class _TrouverState extends State<Trouver> {
   // cette variable sert à gérer le cas où l'user parcourt la totalité des mots
   late int max_length = all_filter[0][difficulty].length;
   //----fonctions intermédiaires----------------------------------------------
+  remove_empty(List list) {
+    list.removeWhere((value) => value == "");
+    return list;
+  }
+
   save_data_one(file_name, new_ids) async {
     final folder = await getApplicationDocumentsDirectory();
     final folderPath = folder.path;
@@ -70,7 +83,7 @@ class _TrouverState extends State<Trouver> {
       await file.writeAsString(new_ids);
     } else {
       String content = lines[0];
-      await file.writeAsString(content + ',' + new_ids);
+      await file.writeAsString(new_ids + ',' + content);
     }
   }
 
@@ -99,7 +112,9 @@ class _TrouverState extends State<Trouver> {
   }
 
   //----fonctions finales-----------------------------------------------------
-  rightPush() {
+  rightPush() async {
+    print("Nb max words $nb_words_max");
+    print("Nb current $current_number");
     setState(() {
       values_learning = values_learning +
           all_filter[0][difficulty][index_diff[difficulty]] +
@@ -112,9 +127,17 @@ class _TrouverState extends State<Trouver> {
           ',';
       index_diff[difficulty] = index_diff[difficulty] + 1;
       sub_index++;
-      nb_learn = nb_learn + 1;
+      nb_learning = nb_learning + 1;
+      current_number = nb_learned + nb_learning;
       need_sauvegarde = true;
+
+      if (current_number >= nb_words_max) {
+        go_to_pay(context);
+      }
     });
+    if (current_number >= nb_words_max) {
+      await saveData();
+    }
   }
 
   leftPush() {
@@ -180,9 +203,11 @@ class _TrouverState extends State<Trouver> {
     return true; // return true if the route to be popped
   }
 
-  pushApprendre() {
+  pushApprendre() async {
+    await saveData();
     restart_trouver();
     go_to_paire(context);
+    return;
   }
   //----fonctions de debug-----------------------------------------------------
 
@@ -241,15 +266,11 @@ class _TrouverState extends State<Trouver> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // if (need_sauvegarde)
-                //   ElevatedButton(
-                //       onPressed: (sub_index > 0) ? saveData : null,
-                //       child: Text('Sauvegarder mes choix')),
                 ElevatedButton(
                     onPressed:
-                        ((nb_learn >= min_nb_word)) ? pushApprendre : null,
-                    child:
-                        Text('Apprendre mes $nb_learn mots (min: $nb_batch)')),
+                        ((nb_learning >= min_nb_word)) ? pushApprendre : null,
+                    child: Text(
+                        'Apprendre mes $nb_learning mots (min: $nb_batch)')),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+
 import '_global_functions.dart';
 import '_global_variables.dart';
+import '1_home.dart';
 
 class Account extends StatefulWidget {
   final folderPath;
@@ -15,6 +19,7 @@ class _AccountState extends State<Account> {
   //other
   int index = 0;
   bool display = false;
+  bool popup = false;
   //file name
   //mots en
   String file_en_learning = get_file_en_learning();
@@ -25,15 +30,49 @@ class _AccountState extends State<Account> {
   //ids
   String file_notlearn = get_file_notlearn();
   //listes de mots
-  late List en_learning = import_list_sync(file_en_learning, folderPath);
-  late List fr_learning = import_list_sync(file_fr_learning, folderPath);
-  late List en_learned = import_list_sync(file_en_learned, folderPath);
-  late List fr_learned = import_list_sync(file_fr_learned, folderPath);
+  late List<String> en_raw_learning =
+      import_list_sync(file_en_learning, folderPath);
+  late List<String> fr_raw_learning =
+      import_list_sync(file_fr_learning, folderPath);
+  late List<List<String>> new_lists =
+      remove_empty(en_raw_learning, fr_raw_learning);
+  late List<String> en_learning = new_lists[0];
+  late List<String> fr_learning = new_lists[1];
+
+  late List<String> en_raw_learned =
+      import_list_sync(file_en_learned, folderPath);
+  late List<String> fr_raw_learned =
+      import_list_sync(file_fr_learned, folderPath);
+  late List<List<String>> new_lists2 =
+      remove_empty(en_raw_learned, fr_raw_learned);
+  late List<String> en_learned = new_lists2[0];
+  late List<String> fr_learned = new_lists2[1];
+
   late List ids_notlearn = import_list_sync(file_notlearn, folderPath);
+
+  late List en_all = en_learning + en_learned;
+  late List fr_all = fr_learning + fr_learned;
   //other late
   late int nb_mot_learned = en_learned.length;
   late int nb_mot_learning = en_learning.length;
   late int nb_mot_declined = ids_notlearn.length;
+
+  //----fonctions intermédiaires
+  save_data(file_name, new_list) async {
+    final folder = await getApplicationDocumentsDirectory();
+    final folderPath = folder.path;
+    final file = File('$folderPath/$file_name');
+    List lines = file.readAsLinesSync();
+    await file.writeAsString(new_list.join(','));
+  }
+
+  go_to_account() async {
+    create_setting();
+    final folder = await getApplicationDocumentsDirectory();
+    final folderPath = folder.path;
+    await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => Account(folderPath)));
+  }
 
   //----fonctions finales ----------------------------------------------------
   _pushLearning() {
@@ -50,14 +89,35 @@ class _AccountState extends State<Account> {
     });
   }
 
+  _pushReset() {
+    setState(() {
+      popup = !popup;
+    });
+  }
+
+  _pushYes() async {
+    await save_data(file_en_learning, en_all);
+    await save_data(file_fr_learning, fr_all);
+    await save_data(file_en_learned, []);
+    await save_data(file_en_learned, []);
+    _pushReset();
+    go_to_account();
+  }
+
+  Future<bool> _willPopCallback() async {
+    await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => Home()));
+    return true; // return true if the route to be popped
+  }
+
   @override
   Widget build(BuildContext context) {
     List<List> en_words = [en_learning, en_learned];
     List<List> fr_words = [fr_learning, fr_learned];
     List<TableRow> children_table = [];
     children_table.add(TableRow(children: [
-      Center(child: Text('FRENCH')),
-      Center(child: Text('ENGLISH'))
+      Center(child: Text('ENGLISH')),
+      Center(child: Text('FRENCH'))
     ]));
     for (var i = 0; i < en_words[index].length; i++) {
       children_table.add(TableRow(children: [
@@ -71,43 +131,78 @@ class _AccountState extends State<Account> {
         width: 28.0,
         alignment: FractionalOffset.center);
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-          title: Row(children: [
-        Text('Mes mots'),
-        Expanded(child: Container()),
-        appLogo
-      ])),
-      body: Scrollbar(
-          child: SingleChildScrollView(
-              child: Center(
-                  child: Column(
-        children: [
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                primary: ((index == 0) & display) ? Colors.green : Colors.blue,
-              ),
-              onPressed: _pushLearning,
-              child: Text('Mots en cours d\'apprentissage: $nb_mot_learning')),
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                primary: ((index == 1) & display) ? Colors.green : Colors.blue,
-              ),
-              onPressed: _pushLearned,
-              child: Text('Mots appris: $nb_mot_learned')),
+    return WillPopScope(
+        onWillPop: _willPopCallback,
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+              title: Row(children: [
+            Text('Mes mots'),
+            Expanded(child: Container()),
+            appLogo
+          ])),
+          body: Scrollbar(
+              child: SingleChildScrollView(
+                  child: Center(
+                      child: Column(
+            mainAxisAlignment: (popup)
+                ? MainAxisAlignment.spaceEvenly
+                : MainAxisAlignment.center,
+            children: [
+              if (!popup)
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary:
+                          ((index == 0) & display) ? Colors.green : Colors.blue,
+                    ),
+                    onPressed: _pushLearning,
+                    child: Text(
+                        'Mots en cours d\'apprentissage: $nb_mot_learning')),
+              if (!popup)
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary:
+                          ((index == 1) & display) ? Colors.green : Colors.blue,
+                    ),
+                    onPressed: _pushLearned,
+                    child: Text('Mots appris: $nb_mot_learned')),
 
-          // ElevatedButton(
-          //     onPressed: null, child: Text('Mots refusés: $nb_mot_declined')),
-          if (display)
-            Table(
-              textDirection: TextDirection.ltr,
-              defaultVerticalAlignment: TableCellVerticalAlignment.bottom,
-              border: TableBorder.all(width: 1.0, color: Colors.black),
-              children: children_table,
-            )
-        ],
-      )))),
-    );
+              // ElevatedButton(
+              //     onPressed: null, child: Text('Mots refusés: $nb_mot_declined')),
+              if (display & !popup)
+                Table(
+                  textDirection: TextDirection.ltr,
+                  defaultVerticalAlignment: TableCellVerticalAlignment.bottom,
+                  border: TableBorder.all(width: 1.0, color: Colors.black),
+                  children: children_table,
+                ),
+              if ((!popup) & (en_learned.length > 0))
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.orange.shade300,
+                    ),
+                    onPressed: _pushReset,
+                    child: Text('Réapprendre tous mes mots')),
+              if (popup)
+                AlertDialog(
+                  title: Text("Êtes-vous sûrs ?"),
+                  content: Text(
+                      "Cela déplacera tous les mots dans la catégorie \"Appris\" dans la catégorie \"En cours d'apprentissage\"."),
+                  actions: [
+                    Row(children: [
+                      TextButton(
+                        child: Text("Oui"),
+                        onPressed: _pushYes,
+                      ),
+                      TextButton(
+                        child: Text("Non"),
+                        onPressed: _pushReset,
+                      ),
+                    ])
+                  ],
+                ),
+            ],
+          )))),
+        ));
   }
 }
