@@ -20,9 +20,6 @@ class _SortOneState extends State<SortOne> {
   final folderPath;
   _SortOneState(this.folderPath);
 
-  //settings
-  late List<String> liste_settings = import_setting_sync(folderPath);
-  late int nb_batch = int.parse(liste_settings[1]);
   //others
   int index = -1;
   List _informations = [
@@ -31,44 +28,45 @@ class _SortOneState extends State<SortOne> {
     'Cela signifie que ce mot sera considéré comme appris et qu\'il ne vous sera plus proposé.'
   ];
   bool display_info = false;
-  List texts = [
-    'Continuer à l\'apprendre',
-    '   Réapprendre plus tard  ',
-    '  Classer comme appris  '
-  ];
+  List texts = ['Keep learning them', ' Re-learn later  ', 'Sort as learned  '];
 
+  //settings
+  late List<String> liste_settings = import_setting_sync(folderPath);
+  late int nb_batch = int.parse(liste_settings[1]);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
   //mots en
-  String file_en_learning = get_file_en_learning();
-  String file_en_learned = get_file_en_learned();
+  late String file_learn_learning = get_file_learn_learning(learn);
+  late String file_learn_learned = get_file_learn_learned(learn);
   //mots fr
-  String file_fr_learning = get_file_fr_learning();
-  String file_fr_learned = get_file_fr_learned();
+  late String file_speak_learning = get_file_speak_learning(speak);
+  late String file_speak_learned = get_file_speak_learned(speak);
   // words
   late List<String> en_raw_learning =
-      import_list_sync(file_en_learning, folderPath);
+      import_list_sync(file_learn_learning, folderPath);
   late List<String> fr_raw_learning =
-      import_list_sync(file_fr_learning, folderPath);
+      import_list_sync(file_speak_learning, folderPath);
   late List<List<String>> new_lists =
       remove_empty(en_raw_learning, fr_raw_learning);
   late List<String> en_learning = new_lists[0];
   late List<String> fr_learning = new_lists[1];
 
-  late List<String> sub_fr_learning =
+  late List<String> sub_speak_learning =
       process(fr_learning.getRange(0, nb_batch).toList());
-  late List<String> sub_en_learning =
+  late List<String> sub_learn_learning =
       process(en_learning.getRange(0, nb_batch).toList());
 
   late List<String> en_raw_learned =
-      import_list_sync(file_en_learned, folderPath);
+      import_list_sync(file_learn_learned, folderPath);
   late List<String> fr_raw_learned =
-      import_list_sync(file_fr_learned, folderPath);
+      import_list_sync(file_speak_learned, folderPath);
   late List<List<String>> new_lists2 =
       remove_empty(en_raw_learned, fr_raw_learned);
   late List<String> en_learned = new_lists2[0];
   late List<String> fr_learned = new_lists2[1];
   // index
   late int number = 0;
-  late int number_max = sub_en_learning.length;
+  late int number_max = sub_learn_learning.length;
   //----fonctions intermédiaires intro ---------------------------------------
   import_list_async(file_name) async {
     final folder = await getApplicationDocumentsDirectory();
@@ -99,7 +97,7 @@ class _SortOneState extends State<SortOne> {
     final folder = await getApplicationDocumentsDirectory();
     final folderPath = folder.path;
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Home()));
+        context, MaterialPageRoute(builder: (context) => Home(speak, learn)));
   }
 
   list_go_to_end(list, nb) {
@@ -119,9 +117,9 @@ class _SortOneState extends State<SortOne> {
   }
 
   // variables
-  late List<String> tronc_en_learning =
+  late List<String> tronc_learn_learning =
       en_learning.getRange(nb_batch, en_learning.length).toList();
-  late List<String> tronc_fr_learning =
+  late List<String> tronc_speak_learning =
       fr_learning.getRange(nb_batch, en_learning.length).toList();
   late List<String> en_learning_start = [];
   late List<String> fr_learning_start = [];
@@ -134,9 +132,10 @@ class _SortOneState extends State<SortOne> {
 
   _continuer() {
     setState(() {
-      en_learning_start.add(sub_en_learning[number]);
-      fr_learning_start.add(sub_fr_learning[number]);
+      en_learning_start.add(sub_learn_learning[number]);
+      fr_learning_start.add(sub_speak_learning[number]);
       number++;
+      print("2_4_2_sort _continuer $number");
     });
 
     if (number == number_max) {
@@ -146,9 +145,10 @@ class _SortOneState extends State<SortOne> {
 
   _plus_tard() {
     setState(() {
-      en_learning_end.add(sub_en_learning[number]);
-      fr_learning_end.add(sub_fr_learning[number]);
+      en_learning_end.add(sub_learn_learning[number]);
+      fr_learning_end.add(sub_speak_learning[number]);
       number++;
+      print("2_4_2_sort _plus_tard $number");
     });
 
     if (number == number_max) {
@@ -158,9 +158,10 @@ class _SortOneState extends State<SortOne> {
 
   _appris() {
     setState(() {
-      en_learned_start.add(sub_en_learning[number]);
-      fr_learned_start.add(sub_fr_learning[number]);
+      en_learned_start.add(sub_learn_learning[number]);
+      fr_learned_start.add(sub_speak_learning[number]);
       number++;
+      print("2_4_2_sort _appris $number");
     });
 
     if (number == number_max) {
@@ -169,18 +170,18 @@ class _SortOneState extends State<SortOne> {
   }
 
   _end() {
-    String new_content_en_learned =
+    String new_content_learn_learned =
         from_list_to_string([...en_learned_start, ...en_learned]);
-    String new_content_fr_learned =
+    String new_content_speak_learned =
         from_list_to_string([...fr_learned_start, ...fr_learned]);
-    String new_content_en_learning = from_list_to_string(
-        [...en_learning_start, ...tronc_en_learning, ...en_learning_end]);
-    String new_content_fr_learning = from_list_to_string(
-        [...fr_learning_start, ...tronc_fr_learning, ...fr_learning_end]);
-    export_list(file_en_learned, new_content_en_learned);
-    export_list(file_fr_learned, new_content_fr_learned);
-    export_list(file_en_learning, new_content_en_learning);
-    export_list(file_fr_learning, new_content_fr_learning);
+    String new_content_learn_learning = from_list_to_string(
+        [...en_learning_start, ...tronc_learn_learning, ...en_learning_end]);
+    String new_content_speak_learning = from_list_to_string(
+        [...fr_learning_start, ...tronc_speak_learning, ...fr_learning_end]);
+    export_list(file_learn_learned, new_content_learn_learned);
+    export_list(file_speak_learned, new_content_speak_learned);
+    export_list(file_learn_learning, new_content_learn_learning);
+    export_list(file_speak_learning, new_content_speak_learning);
     restart_SortOne();
     go_to_home();
   }
@@ -204,6 +205,7 @@ class _SortOneState extends State<SortOne> {
   Future<bool> _willPopCallback() async {
     final folder = await getApplicationDocumentsDirectory();
     final folderPath = folder.path;
+    print("2_4_2_sort _willPopCallback $folderPath");
     await Navigator.push(
         context, MaterialPageRoute(builder: (context) => Fuzzy(folderPath)));
     return true; // return true if the route to be popped
@@ -261,7 +263,7 @@ class _SortOneState extends State<SortOne> {
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
                 title: Row(children: [
-              Text('Etape 4/4: Classification'),
+              Text('Step 4/4: Classification'),
               Expanded(child: Container()),
               appLogo
             ])),
@@ -286,11 +288,11 @@ class _SortOneState extends State<SortOne> {
                                   child: Center(
                                       child: (number < number_max)
                                           ? Text(
-                                              'Que faire de ce mot ? (${number + 1}/$number_max)',
+                                              'What to do with this word ? (${number + 1}/$number_max)',
                                               style: TextStyle(fontSize: 20),
                                             )
                                           : Text(
-                                              'Que faire de ce mot ? (${number}/$number_max)',
+                                              'What to do with this word ? (${number}/$number_max)',
                                               style: TextStyle(fontSize: 20),
                                             )))),
                           Row(
@@ -305,15 +307,16 @@ class _SortOneState extends State<SortOne> {
                                     child: Center(
                                       child: (number < number_max)
                                           ? Text(
-                                              sub_en_learning[number] +
+                                              sub_learn_learning[number] +
                                                   ' : ' +
-                                                  sub_fr_learning[number],
+                                                  sub_speak_learning[number],
                                               style: TextStyle(fontSize: 15),
                                             )
                                           : Text(
-                                              sub_en_learning[number_max - 1] +
+                                              sub_learn_learning[
+                                                      number_max - 1] +
                                                   ' : ' +
-                                                  sub_fr_learning[
+                                                  sub_speak_learning[
                                                       number_max - 1],
                                               style: TextStyle(fontSize: 15),
                                             ),
@@ -350,7 +353,7 @@ class _SortOneState extends State<SortOne> {
                                 primary: Colors.orange,
                               ),
                               onPressed: go_to_sort_multi,
-                              child: Text('Classer par paquet'))
+                              child: Text('Sort by batch'))
                         ]))))));
   }
 }

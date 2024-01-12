@@ -22,8 +22,12 @@ class _PaireState extends State<Paire> {
   final folderPath;
   _PaireState(this.folderPath);
   //settings
+  //settings
+  // late List<String> liste_settings = import_setting_sync(folderPath);
   late List<String> liste_settings = import_setting_sync(folderPath);
   late int nb_batch = min(int.parse(liste_settings[1]), en_learning.length);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
   //others
   bool is_red = false;
   int click_count = 0;
@@ -39,9 +43,9 @@ class _PaireState extends State<Paire> {
   // words
   late List<String> ids_learning = import_list_sync(file_learning, folderPath);
   late List<String> en_raw_learning =
-      import_list_sync(file_en_learning, folderPath);
+      import_list_sync(file_learn_learning, folderPath);
   late List<String> fr_raw_learning =
-      import_list_sync(file_fr_learning, folderPath);
+      import_list_sync(file_speak_learning, folderPath);
   late List<List<String>> new_lists =
       remove_empty(en_raw_learning, fr_raw_learning);
   late List<String> en_learning = new_lists[0];
@@ -49,36 +53,37 @@ class _PaireState extends State<Paire> {
 
   late List<String> sub_ids_learning =
       ids_learning.getRange(0, nb_batch).toList();
-  late List<String> sub_en_learning =
+  late List<String> sub_learn_learning =
       process(en_learning.getRange(0, nb_batch).toList());
-  late List<String> sub_fr_learning =
+  late List<String> sub_speak_learning =
       process(fr_learning.getRange(0, nb_batch).toList());
-  late List<String> sub_shuffle = shuffle(sub_en_learning + sub_fr_learning);
+  late List<String> sub_shuffle =
+      shuffle(sub_learn_learning + sub_speak_learning);
 
   //ids
   String values_learning = '';
   String values_notlearn = '';
   String values_learned = '';
-  String file_learning = get_file_learning();
-  String file_notlearn = get_file_notlearn();
-  String file_learned = get_file_learned();
+  late String file_learning = get_file_learning(speak, learn);
+  late String file_notlearn = get_file_notlearn(speak, learn);
+  late String file_learned = get_file_learned(speak, learn);
   //mots en
-  String values_en_learning = '';
-  String values_en_learned = '';
-  String file_en_learning = get_file_en_learning();
-  String file_en_learned = get_file_en_learned();
+  String values_learn_learning = '';
+  String values_learn_learned = '';
+  late String file_learn_learning = get_file_learn_learning(learn);
+  late String file_learn_learned = get_file_learn_learned(learn);
 
   //mots fr
-  String values_fr_learning = '';
-  String values_fr_learned = '';
+  String values_speak_learning = '';
+  String values_speak_learned = '';
 
-  String file_fr_learned = get_file_fr_learned();
-
+  late String file_speak_learned = get_file_speak_learned(speak);
+  late String file_speak_learning = get_file_speak_learning(speak);
   //----fonctions intermédiaires intro ---------------------------------------
   french_or_english() {
     List<bool> is_english = [];
     for (var word in sub_shuffle) {
-      if (sub_en_learning.contains(word)) {
+      if (sub_learn_learning.contains(word)) {
         is_english.add(true);
       } else {
         is_english.add(false);
@@ -110,10 +115,10 @@ class _PaireState extends State<Paire> {
         click_count = 0;
         scnd_value = sub_shuffle[i];
       });
-      if ((sub_en_learning.indexOf(first_value) ==
-              sub_fr_learning.indexOf(scnd_value)) &
-          (sub_fr_learning.indexOf(first_value) ==
-              sub_en_learning.indexOf(scnd_value))) {
+      if ((sub_learn_learning.indexOf(first_value) ==
+              sub_speak_learning.indexOf(scnd_value)) &
+          (sub_speak_learning.indexOf(first_value) ==
+              sub_learn_learning.indexOf(scnd_value))) {
         setState(() {
           display[i] = false;
           display[index_last_click] = false;
@@ -173,7 +178,7 @@ class _PaireState extends State<Paire> {
 
   Future<bool> _willPopCallback() async {
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Home()));
+        context, MaterialPageRoute(builder: (context) => Home(speak, learn)));
     return true; // return true if the route to be popped
   }
 
@@ -207,7 +212,7 @@ class _PaireState extends State<Paire> {
                 elevation: 2,
                 color: is_red ? Colors.red : Colors.white,
                 child: Text(
-                  'Vies: $life_point',
+                  'Lifes: $life_point',
                   style: TextStyle(fontSize: 20),
                 )))));
     first_element.add(SizedBox(height: height, width: width, child: null));
@@ -266,7 +271,7 @@ class _PaireState extends State<Paire> {
             appBar: AppBar(
               //automaticallyImplyLeading: false,
               title: Row(children: [
-                Text('Etape 1/4: Jeu des paires'),
+                Text('1/4 Peer Group Game'),
                 Expanded(child: Container()),
                 appLogo
               ]),

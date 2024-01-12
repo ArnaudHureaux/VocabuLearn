@@ -1,4 +1,6 @@
+import 'package:VocabuLearn/0_language.dart';
 import "package:flutter/material.dart";
+import '0_language.dart';
 import '1_home.dart';
 
 void main() {
@@ -15,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const Home(),
+      home: const Language(),
     );
   }
 }

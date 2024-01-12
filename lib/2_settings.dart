@@ -16,8 +16,22 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   final folderPath;
   _SettingsState(this.folderPath);
+  //file names
+  //ids
+  late String file_learning = get_file_learning(speak, learn);
+  late String file_notlearn = get_file_notlearn(speak, learn);
+  late String file_learned = get_file_learned(speak, learn);
+  //mots en
+  late String file_learn_learning = get_file_learn_learning(learn);
+  late String file_learn_learned = get_file_learn_learned(learn);
+  //mots fr
+  late String file_speak_learning = get_file_speak_learning(speak);
+  late String file_speak_learned = get_file_speak_learned(speak);
+
   //settings
   late List<String> liste_settings = import_setting_sync(folderPath);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
   late int nb_batch = int.parse(liste_settings[1]);
   late int nb_questions = int.parse(liste_settings[3]);
   late int similarity_threshold = int.parse(liste_settings[5]);
@@ -26,7 +40,7 @@ class _SettingsState extends State<Settings> {
   late bool step_3 = (liste_settings[11] == 'true');
   //others
   int nb_actions = 0;
-  late List en_learning = import_list_sync(file_en_learning, folderPath);
+  late List en_learning = import_list_sync(file_learn_learning, folderPath);
   //fonction intermédiaire
   _filter_list(List<String> list, int max_int) {
     max_int = max(max_int, 6);
@@ -118,12 +132,12 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     List<Row> children_column = [];
     List<String> textes = [
-      'Nombre de mots par apprentissage',
-      'Nombre de questions par quizz',
-      '% de similarité nécessaire',
-      '1/3: Jeu des Paires',
-      '2/3: Jeu des Quizz',
-      '3/3: Traduction directes',
+      'Number of words by learning session',
+      'Number of possibilities by quizz',
+      '% of necessary similarity',
+      '1/3 Peer Group Game',
+      '2/3 Quizz Game',
+      '3/3 Direct Translation',
     ];
     List<String> values1 = ['6', '9', '12', '15', '18', '21'];
     List<List<String>> values = [];
@@ -206,7 +220,7 @@ class _SettingsState extends State<Settings> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
             title: Row(children: [
-          Text('Mes paramètres'),
+          Text('My Settings'),
           Expanded(child: Container()),
           appLogo
         ])),
@@ -221,10 +235,10 @@ class _SettingsState extends State<Settings> {
               children: [
                 ElevatedButton(
                     onPressed: push_set_default_values,
-                    child: Text('Paramètres par défaut')),
+                    child: Text('Default\'s settings')),
                 ElevatedButton(
                     onPressed: (nb_actions > 0) ? push_save_settings : null,
-                    child: Text('Sauvegarder'))
+                    child: Text('Save'))
               ],
             )
           ],

@@ -18,12 +18,19 @@ class Fuzzy extends StatefulWidget {
 
 class _FuzzyState extends State<Fuzzy> {
   final folderPath;
-  _FuzzyState(this.folderPath);
+  _FuzzyState(this.folderPath) {
+    print("2_3_fuzzy _FuzzyState speak $speak");
+    print("2_3_fuzzy _FuzzyState learn $learn");
+    print("2_3_fuzzy _FuzzyState file_learn_learning $file_learn_learning");
+    print("2_3_fuzzy _FuzzyState file_speak_learning $file_speak_learning");
+  }
 
   //settings
   late List<String> liste_settings = import_setting_sync(folderPath);
   late int nb_batch = int.parse(liste_settings[1]);
   late int similarity_threshold = int.parse(liste_settings[5]);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
   //others
   bool next = false;
   bool text = false;
@@ -35,19 +42,19 @@ class _FuzzyState extends State<Fuzzy> {
   String text_sucess = '';
   var _controller = TextEditingController();
   //mots en
-  String file_en_learning = get_file_en_learning();
+  late String file_learn_learning = get_file_learn_learning(learn);
   //mots fr
-  String file_fr_learning = get_file_fr_learning();
+  late String file_speak_learning = get_file_speak_learning(speak);
   // words
   late List<String> en_raw_learning =
-      import_list_sync(file_en_learning, folderPath);
+      import_list_sync(file_learn_learning, folderPath);
   late List<String> fr_raw_learning =
-      import_list_sync(file_fr_learning, folderPath);
+      import_list_sync(file_speak_learning, folderPath);
   late List<List<String>> new_lists =
       remove_empty(en_raw_learning, fr_raw_learning);
   late List<String> en_learning = new_lists[0];
   late List<String> fr_learning = new_lists[1];
-  late List<String> sub_fr_learning =
+  late List<String> sub_speak_learning =
       process(fr_learning.getRange(0, nb_batch).toList());
   late List<String> sub_en_learning =
       process(en_learning.getRange(0, nb_batch).toList());
@@ -113,7 +120,7 @@ class _FuzzyState extends State<Fuzzy> {
       next = false;
       _controller.clear();
     });
-    if (index == sub_fr_learning.length - 1) {
+    if (index == sub_speak_learning.length - 1) {
       setState(() {
         index = 0;
       });
@@ -153,7 +160,7 @@ class _FuzzyState extends State<Fuzzy> {
             appBar: AppBar(
                 //automaticallyImplyLeading: false,
                 title: Row(children: [
-              Text('Etape 3/4: Traduction'),
+              Text('3/4 Direct Translation'),
               Expanded(child: Container()),
               appLogo
             ])),
@@ -173,7 +180,7 @@ class _FuzzyState extends State<Fuzzy> {
                               child: Card(
                                 child: Center(
                                     child: Text(
-                                  sub_fr_learning[index],
+                                  sub_speak_learning[index],
                                   style: TextStyle(fontSize: 20),
                                 )),
                               )),
@@ -182,7 +189,7 @@ class _FuzzyState extends State<Fuzzy> {
                             controller: _controller,
                             textAlign: TextAlign.center,
                             decoration:
-                                InputDecoration(hintText: 'Traduire le mot'),
+                                InputDecoration(hintText: 'Translate the word'),
                             onFieldSubmitted: _submitPush,
                             onChanged: _fuzzyMatch,
                             //validator: (value) => value.length>20 ? null:"Input too long",
@@ -191,11 +198,11 @@ class _FuzzyState extends State<Fuzzy> {
                           if (spoil)
                             ElevatedButton(
                                 onPressed: _spoilPush,
-                                child: Text('Voir la solution')),
+                                child: Text('See the answer')),
                           if (sucess) Text(text_sucess),
                           if (solution)
                             Column(children: [
-                              Text('La bonne réponse était:'),
+                              Text('The correct answer was:'),
                               SizedBox(height: 10),
                               Text(
                                 sub_en_learning[index],
@@ -217,7 +224,3 @@ class _FuzzyState extends State<Fuzzy> {
                         ]))))));
   }
 }
-  // bool next = false;
-  // bool text = false;
-  // bool spoil = false;
-  // bool solution = false;

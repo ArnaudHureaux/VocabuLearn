@@ -83,6 +83,7 @@ go_to_paire(context) async {
 }
 
 import_list_sync(file_name, folderPath) {
+  print("_global_functions import_list_sync $file_name");
   final file = File('$folderPath/$file_name');
   List<String> lines = file.readAsLinesSync();
   if (lines.length == 0) {
@@ -115,6 +116,31 @@ import_setting_sync(folderPath) {
     String content_str = get_default_settings();
     file.writeAsString(content_str);
     return content_str.split(',');
+  }
+  if ((lines.length > 0) & (lines[0].split(',').length < 17)) {
+    String content_str = get_default_settings();
+    file.writeAsString(content_str);
+    return content_str.split(',');
+  } else {
+    List<String> content_list = lines[0].split(',');
+    return content_list;
+  }
+}
+
+import_setting_async2() async {
+  final folder = await getApplicationDocumentsDirectory();
+  final folderPath = folder.path;
+  final file = File('$folderPath/settings.txt');
+  List<String> lines = file.readAsLinesSync();
+  if (lines.length == 0) {
+    String content_str = get_default_settings();
+    file.writeAsString(content_str);
+    return content_str.split(',');
+  }
+  if ((lines.length > 0) & (lines[0].split(',').length < 17)) {
+    String content_str = get_default_settings();
+    file.writeAsString(content_str);
+    return content_str.split(',');
   } else {
     List<String> content_list = lines[0].split(',');
     return content_list;
@@ -141,8 +167,8 @@ go_to_pay(context) async {
 
 remove_empty(List<String> en_learning, List<String> fr_learning) {
   List<int> index_list = [];
-  print(en_learning);
-  print(fr_learning);
+  print("_global_functions remove_empty en_learning $en_learning");
+  print('_global_functions remove_empty fr_learning $fr_learning');
   for (var i = 0; i < en_learning.length; i++) {
     if ((en_learning[i] == '') | (fr_learning[i] == '')) {
       index_list.add(i);

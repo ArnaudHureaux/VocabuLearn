@@ -20,47 +20,45 @@ class _SortMultiState extends State<SortMulti> {
   final folderPath;
   _SortMultiState(this.folderPath);
 
-  //settings
-  late List<String> liste_settings = import_setting_sync(folderPath);
-  late int nb_batch = int.parse(liste_settings[1]);
   //others
   int index = -1;
   List _informations = [
-    'Cela signifie que ces mots vous seront reproposés la prochaine fois que lancerez un apprentissage.',
-    'Cela signifie que ces mots seront mis à la fin de votre liste de mots à apprendre actuelle, et vous serons reproposés plus tard.',
-    'Cela signifie que ces mots seront considérés comme appris et qu\'il ne vous seront plus proposés.'
+    'This means that these words will be reproposed to you the next time you start learning.',
+    'This means that these words will be put at the end of your current learning list, and will be offered to you later.',
+    'This means that these words will be considered as learned and will not be offered again.',
   ];
   bool display_info = false;
-  List texts = [
-    'Continuer à les apprendre',
-    '   Réapprendre plus tard  ',
-    '  Classer comme appris  '
-  ];
+  List texts = ['Keep learning them', ' Re-learn later  ', 'Sort as learned  '];
 
+  //settings
+  late List<String> liste_settings = import_setting_sync(folderPath);
+  late int nb_batch = int.parse(liste_settings[1]);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
   //mots en
-  String file_en_learning = get_file_en_learning();
-  String file_en_learned = get_file_en_learned();
+  late String file_learn_learning = get_file_learn_learning(learn);
+  late String file_learn_learned = get_file_learn_learned(learn);
   //mots fr
-  String file_fr_learning = get_file_fr_learning();
-  String file_fr_learned = get_file_fr_learned();
+  late String file_speak_learning = get_file_speak_learning(speak);
+  late String file_speak_learned = get_file_speak_learned(speak);
   // words
   late List<String> en_raw_learning =
-      import_list_sync(file_en_learning, folderPath);
+      import_list_sync(file_learn_learning, folderPath);
   late List<String> fr_raw_learning =
-      import_list_sync(file_fr_learning, folderPath);
+      import_list_sync(file_speak_learning, folderPath);
   late List<List<String>> new_lists =
       remove_empty(en_raw_learning, fr_raw_learning);
   late List<String> en_learning = new_lists[0];
   late List<String> fr_learning = new_lists[1];
-  late List<String> sub_fr_learning =
+  late List<String> sub_speak_learning =
       process(fr_learning.getRange(0, nb_batch).toList());
-  late List<String> sub_en_learning =
+  late List<String> sub_learn_learning =
       process(en_learning.getRange(0, nb_batch).toList());
 
   late List<String> en_raw_learned =
-      import_list_sync(file_en_learned, folderPath);
+      import_list_sync(file_learn_learned, folderPath);
   late List<String> fr_raw_learned =
-      import_list_sync(file_fr_learned, folderPath);
+      import_list_sync(file_speak_learned, folderPath);
   late List<List<String>> new_lists2 =
       remove_empty(en_raw_learned, fr_raw_learned);
   late List<String> en_learned = new_lists2[0];
@@ -95,7 +93,7 @@ class _SortMultiState extends State<SortMulti> {
     final folder = await getApplicationDocumentsDirectory();
     final folderPath = folder.path;
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Home()));
+        context, MaterialPageRoute(builder: (context) => Home(speak, learn)));
   }
 
   list_go_to_end(list, nb) {
@@ -146,25 +144,25 @@ class _SortMultiState extends State<SortMulti> {
     List new_list_fr = list_go_to_end(fr_learning, nb_batch);
     String new_content_en = from_list_to_string(new_list_en);
     String new_content_fr = from_list_to_string(new_list_fr);
-    export_list(file_en_learning, new_content_en);
-    export_list(file_fr_learning, new_content_fr);
+    export_list(file_learn_learning, new_content_en);
+    export_list(file_speak_learning, new_content_fr);
     restart_sort();
     go_to_home();
   }
 
   _appris() {
-    String new_content_en_learned = from_list_to_string(
+    String new_content_learn_learned = from_list_to_string(
         [...en_learning.getRange(0, nb_batch).toList(), ...en_learned]);
-    String new_content_fr_learned = from_list_to_string(
+    String new_content_speak_learned = from_list_to_string(
         [...fr_learning.getRange(0, nb_batch).toList(), ...fr_learned]);
-    export_list(file_en_learned, new_content_en_learned);
-    export_list(file_fr_learned, new_content_fr_learned);
+    export_list(file_learn_learned, new_content_learn_learned);
+    export_list(file_speak_learned, new_content_speak_learned);
     List new_list_en = list_delete_start(en_learning, nb_batch);
     List new_list_fr = list_delete_start(fr_learning, nb_batch);
     String new_content_en = from_list_to_string(new_list_en);
     String new_content_fr = from_list_to_string(new_list_fr);
-    export_list(file_en_learning, new_content_en);
-    export_list(file_fr_learning, new_content_fr);
+    export_list(file_learn_learning, new_content_en);
+    export_list(file_speak_learning, new_content_fr);
     restart_sort();
     go_to_home();
   }
@@ -190,14 +188,12 @@ class _SortMultiState extends State<SortMulti> {
   @override
   Widget build(BuildContext context) {
     List<TableRow> children_table = [];
-    children_table.add(TableRow(children: [
-      Center(child: Text('FRENCH')),
-      Center(child: Text('ENGLISH'))
-    ]));
+    children_table.add(TableRow(
+        children: [Center(child: Text(speak)), Center(child: Text(learn))]));
     for (var i = 0; i < nb_batch; i++) {
       children_table.add(TableRow(children: [
-        Center(child: Text(sub_fr_learning[i])),
-        Center(child: Text(sub_en_learning[i]))
+        Center(child: Text(sub_speak_learning[i])),
+        Center(child: Text(sub_learn_learning[i]))
       ]));
     }
     List functions = [
@@ -237,7 +233,7 @@ class _SortMultiState extends State<SortMulti> {
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
                 title: Row(children: [
-              Text('Etape 4/4: Classification'),
+              Text('Step 4/4: Sorting'),
               Expanded(child: Container()),
               appLogo
             ])),
@@ -261,7 +257,7 @@ class _SortMultiState extends State<SortMulti> {
                               child: Card(
                                   child: Center(
                                       child: Text(
-                                'Que faire de ces mots ?',
+                                'What to do with these words ?',
                                 style: TextStyle(fontSize: 20),
                               )))),
                           Table(
@@ -300,7 +296,7 @@ class _SortMultiState extends State<SortMulti> {
                                 primary: Colors.orange,
                               ),
                               onPressed: go_to_sort_one,
-                              child: Text('Classer mot par mot'))
+                              child: Text('Sort word by word'))
                         ]))))));
   }
 }

@@ -24,37 +24,39 @@ class _QuizzState extends State<Quizz> {
   late List<String> liste_settings = import_setting_sync(folderPath);
   late int nb_batch = int.parse(liste_settings[1]);
   late int nb_questions = int.parse(liste_settings[3]);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
   //others
   int index = 0;
   int error = 0;
   late List<bool> is_red = List.filled(nb_questions, false);
   //mots en
-  String file_en_learning = get_file_en_learning();
+  late String file_learn_learning = get_file_learn_learning(learn);
   //mots fr
-  String file_fr_learning = get_file_fr_learning();
+  late String file_speak_learning = get_file_speak_learning(speak);
   // words
   late List<String> en_raw_learning =
-      import_list_sync(file_en_learning, folderPath);
+      import_list_sync(file_learn_learning, folderPath);
   late List<String> fr_raw_learning =
-      import_list_sync(file_fr_learning, folderPath);
+      import_list_sync(file_speak_learning, folderPath);
   late List<List<String>> new_lists =
       remove_empty(en_raw_learning, fr_raw_learning);
   late List<String> en_learning = new_lists[0];
   late List<String> fr_learning = new_lists[1];
-  late List<String> sub_fr_learning =
+  late List<String> sub_speak_learning =
       process(fr_learning.getRange(0, nb_batch).toList());
   late List<String> sub_en_learning =
       process(en_learning.getRange(0, nb_batch).toList());
   late List<List<String>> quizz_words = get_quizz_words(sub_en_learning);
 //----fonctions intermédiaires intro ---------------------------------------
 
-  get_quizz_words(sub_fr_learning) {
+  get_quizz_words(sub_speak_learning) {
     List<List<String>> quizz_words = [];
     for (int i = 0; i < nb_batch; i++) {
       List<String> del = [];
-      del.add([...sub_fr_learning][i]);
-      List<String> del_fr = [...sub_fr_learning];
-      del_fr.remove(sub_fr_learning[i]);
+      del.add([...sub_speak_learning][i]);
+      List<String> del_fr = [...sub_speak_learning];
+      del_fr.remove(sub_speak_learning[i]);
       del_fr.shuffle();
       for (var j = 0; j < nb_questions - 1; j++) {
         del.add(del_fr[j]);
@@ -148,7 +150,7 @@ class _QuizzState extends State<Quizz> {
             appBar: AppBar(
                 //automaticallyImplyLeading: false,
                 title: Row(children: [
-              Text('Etape 2/4: Jeu des Quizz'),
+              Text('2/4 Quizz Game'),
               Expanded(child: Container()),
               appLogo
             ])),
@@ -173,7 +175,7 @@ class _QuizzState extends State<Quizz> {
                             child: Card(
                               child: Center(
                                   child: Text(
-                                sub_fr_learning[index],
+                                sub_speak_learning[index],
                                 style: TextStyle(fontSize: 25),
                               )),
                             )),

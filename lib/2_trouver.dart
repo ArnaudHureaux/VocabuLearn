@@ -27,14 +27,18 @@ class _TrouverState extends State<Trouver> {
   late List<String> liste_settings = import_setting_sync(folderPath);
   late int nb_batch = int.parse(liste_settings[1]);
   late int difficulty = int.parse(liste_settings[13]);
-  late int nb_words_max = int.parse(liste_settings[15]);
+  late int nb_words_max = 1000000; //int.parse(liste_settings[15]);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
   //current number of words
-  late List list_en_learning = import_list_sync(file_en_learning, folderPath);
-  late List list_en_learned = import_list_sync(file_en_learned, folderPath);
-  late List list_en_learning_count = remove_empty(list_en_learning);
-  late List list_en_learned_count = remove_empty(list_en_learned);
-  late int nb_learning = list_en_learning_count.length;
-  late int nb_learned = list_en_learned_count.length;
+  late List list_learn_learning =
+      import_list_sync(file_learn_learning, folderPath);
+  late List list_learn_learned =
+      import_list_sync(file_learn_learned, folderPath);
+  late List list_learn_learning_count = remove_empty(list_learn_learning);
+  late List list_learn_learned_count = remove_empty(list_learn_learned);
+  late int nb_learning = list_learn_learning_count.length;
+  late int nb_learned = list_learn_learned_count.length;
   late int current_number = nb_learned + nb_learning;
 
   // pour gérer l'affichage
@@ -49,20 +53,20 @@ class _TrouverState extends State<Trouver> {
   String values_learning = '';
   String values_notlearn = '';
   String values_learned = '';
-  String file_learning = get_file_learning();
-  String file_notlearn = get_file_notlearn();
-  String file_learned = get_file_learned();
+  late String file_learning = get_file_learning(speak, learn);
+  late String file_notlearn = get_file_notlearn(speak, learn);
+  late String file_learned = get_file_learned(speak, learn);
   //mots fr & en
-  String values_en_learning = '';
-  String values_fr_learning = '';
-  String values_en_learned = '';
-  String values_fr_learned = '';
+  String values_learn_learning = '';
+  String values_speak_learning = '';
+  String values_learn_learned = '';
+  String values_speak_learned = '';
   //mots en
-  String file_en_learning = get_file_en_learning();
-  String file_en_learned = get_file_en_learned();
+  late String file_learn_learning = get_file_learn_learning(learn);
+  late String file_learn_learned = get_file_learn_learned(learn);
   //mots fr
-  String file_fr_learning = get_file_fr_learning();
-  String file_fr_learned = get_file_fr_learned();
+  late String file_speak_learning = get_file_speak_learning(speak);
+  late String file_speak_learned = get_file_speak_learned(speak);
   // cette variable sert à gérer le cas où l'user parcourt la totalité des mots
   late int max_length = all_filter[0][difficulty].length;
   //----fonctions intermédiaires----------------------------------------------
@@ -113,16 +117,14 @@ class _TrouverState extends State<Trouver> {
 
   //----fonctions finales-----------------------------------------------------
   rightPush() async {
-    print("Nb max words $nb_words_max");
-    print("Nb current $current_number");
     setState(() {
       values_learning = values_learning +
-          all_filter[0][difficulty][index_diff[difficulty]] +
+          all_filter[0][difficulty][index_diff[difficulty]].toString() +
           ',';
-      values_en_learning = values_en_learning +
+      values_learn_learning = values_learn_learning +
           all_filter[1][difficulty][index_diff[difficulty]] +
           ',';
-      values_fr_learning = values_fr_learning +
+      values_speak_learning = values_speak_learning +
           all_filter[2][difficulty][index_diff[difficulty]] +
           ',';
       index_diff[difficulty] = index_diff[difficulty] + 1;
@@ -132,6 +134,7 @@ class _TrouverState extends State<Trouver> {
       need_sauvegarde = true;
 
       if (current_number >= nb_words_max) {
+        print(nb_words_max);
         go_to_pay(context);
       }
     });
@@ -143,7 +146,7 @@ class _TrouverState extends State<Trouver> {
   leftPush() {
     setState(() {
       values_notlearn = values_notlearn +
-          all_filter[0][difficulty][index_diff[difficulty]] +
+          all_filter[0][difficulty][index_diff[difficulty]].toString() +
           ',';
       index_diff[difficulty] = index_diff[difficulty] + 1;
       sub_index++;
@@ -159,10 +162,10 @@ class _TrouverState extends State<Trouver> {
     await save_data_one(file_learning, values_learning);
     await save_data_one(file_notlearn, values_notlearn);
     await save_data_one(file_learned, values_learned);
-    await save_data_one(file_en_learning, values_en_learning);
-    await save_data_one(file_fr_learning, values_fr_learning);
-    await save_data_one(file_en_learned, '');
-    await save_data_one(file_fr_learned, '');
+    await save_data_one(file_learn_learning, values_learn_learning);
+    await save_data_one(file_speak_learning, values_speak_learning);
+    await save_data_one(file_learn_learned, '');
+    await save_data_one(file_speak_learned, '');
     save_settings_difficulty(difficulty);
     setState(() {
       loading2 = false;
@@ -171,10 +174,10 @@ class _TrouverState extends State<Trouver> {
       values_learning = '';
       values_notlearn = '';
       values_learned = '';
-      values_en_learning = '';
-      values_fr_learning = '';
-      values_en_learned = '';
-      values_fr_learned = '';
+      values_learn_learning = '';
+      values_speak_learning = '';
+      values_learn_learned = '';
+      values_speak_learned = '';
     });
   }
 
@@ -199,7 +202,7 @@ class _TrouverState extends State<Trouver> {
       await saveData();
     }
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Home()));
+        context, MaterialPageRoute(builder: (context) => Home(speak, learn)));
     return true; // return true if the route to be popped
   }
 
@@ -214,9 +217,15 @@ class _TrouverState extends State<Trouver> {
   restart_trouver() {
     bool loading2 = false;
     List<int> index_diff = List.filled(20, 0);
-    late List list_en_learning =
-        import_list_sync('list_en_learning.txt', folderPath);
-    late int nb_learn = list_en_learning.length;
+
+    // String speak = liste_settings[19];
+    // String learn = liste_settings[21];
+    // String file_learn_learning = get_file_learn_learning(learn);
+    // print(learn);
+    // print(file_learn_learning);
+    List list_learn_learning =
+        import_list_sync(file_learn_learning, folderPath);
+    int nb_learn = list_learn_learning.length;
     int nb_notlearn = 0;
     int min_nb_word = 12;
   }
@@ -256,7 +265,7 @@ class _TrouverState extends State<Trouver> {
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             title: Row(children: [
-              Text('Séléction de mots'),
+              Text('Words selection !'),
               Expanded(child: Container()),
               appLogo
             ]),
@@ -269,8 +278,8 @@ class _TrouverState extends State<Trouver> {
                 ElevatedButton(
                     onPressed:
                         ((nb_learning >= min_nb_word)) ? pushApprendre : null,
-                    child: Text(
-                        'Apprendre mes $nb_learning mots (min: $nb_batch)')),
+                    child:
+                        Text('Learn my $nb_learning words (min: $nb_batch)')),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -280,14 +289,14 @@ class _TrouverState extends State<Trouver> {
                         child: Card(
                             child: Center(
                                 child: Text(
-                          'Difficulté/Occurence:  ${difficulty * 5}/100',
+                          'Difficulty/Occurence:  ${difficulty * 5}/100',
                           style: TextStyle(fontSize: 15),
                         )))),
                     SizedBox(
                         height: 30,
                         width: 30,
                         child: ElevatedButton(
-                            onPressed: difficulty > 0 ? lessDifficulty : null,
+                            onPressed: difficulty > 1 ? lessDifficulty : null,
                             style: ElevatedButton.styleFrom(
                                 primary: Colors.green.shade300,
                                 alignment: Alignment.center,
@@ -344,7 +353,7 @@ class _TrouverState extends State<Trouver> {
                           color: Colors.white,
                           size: 30.0,
                         ),
-                        label: Text('Je le connais déjà'),
+                        label: Text('I already know him'),
                         onPressed: loading2 ? null : leftPush,
                       ),
                       ElevatedButton.icon(
@@ -356,7 +365,7 @@ class _TrouverState extends State<Trouver> {
                           color: Colors.white,
                           size: 30.0,
                         ),
-                        label: Text('Je veux l\'apprendre'),
+                        label: Text('I want to learn it'),
                         onPressed: loading2 ? null : rightPush,
                       ),
                     ],

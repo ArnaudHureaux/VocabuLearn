@@ -17,32 +17,35 @@ class _AccountState extends State<Account> {
   final folderPath;
   _AccountState(this.folderPath);
   //other
+  late List<String> liste_settings = import_setting_sync(folderPath);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
   int index = 0;
   bool display = false;
   bool popup = false;
   //file name
   //mots en
-  String file_en_learning = get_file_en_learning();
-  String file_en_learned = get_file_en_learned();
+  late String file_learn_learning = get_file_learn_learning(learn);
+  late String file_learn_learned = get_file_learn_learned(learn);
   //mots fr
-  String file_fr_learning = get_file_fr_learning();
-  String file_fr_learned = get_file_fr_learned();
+  late String file_speak_learning = get_file_speak_learning(speak);
+  late String file_speak_learned = get_file_speak_learned(speak);
   //ids
-  String file_notlearn = get_file_notlearn();
+  late String file_notlearn = get_file_notlearn(speak, learn);
   //listes de mots
   late List<String> en_raw_learning =
-      import_list_sync(file_en_learning, folderPath);
+      import_list_sync(file_learn_learning, folderPath);
   late List<String> fr_raw_learning =
-      import_list_sync(file_fr_learning, folderPath);
+      import_list_sync(file_speak_learning, folderPath);
   late List<List<String>> new_lists =
       remove_empty(en_raw_learning, fr_raw_learning);
   late List<String> en_learning = new_lists[0];
   late List<String> fr_learning = new_lists[1];
 
   late List<String> en_raw_learned =
-      import_list_sync(file_en_learned, folderPath);
+      import_list_sync(file_learn_learned, folderPath);
   late List<String> fr_raw_learned =
-      import_list_sync(file_fr_learned, folderPath);
+      import_list_sync(file_speak_learned, folderPath);
   late List<List<String>> new_lists2 =
       remove_empty(en_raw_learned, fr_raw_learned);
   late List<String> en_learned = new_lists2[0];
@@ -96,17 +99,17 @@ class _AccountState extends State<Account> {
   }
 
   _pushYes() async {
-    await save_data(file_en_learning, en_all);
-    await save_data(file_fr_learning, fr_all);
-    await save_data(file_en_learned, []);
-    await save_data(file_en_learned, []);
+    await save_data(file_learn_learning, en_all);
+    await save_data(file_speak_learning, fr_all);
+    await save_data(file_learn_learned, []);
+    await save_data(file_learn_learned, []);
     _pushReset();
     go_to_account();
   }
 
   Future<bool> _willPopCallback() async {
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Home()));
+        context, MaterialPageRoute(builder: (context) => Home(speak, learn)));
     return true; // return true if the route to be popped
   }
 
@@ -115,10 +118,8 @@ class _AccountState extends State<Account> {
     List<List> en_words = [en_learning, en_learned];
     List<List> fr_words = [fr_learning, fr_learned];
     List<TableRow> children_table = [];
-    children_table.add(TableRow(children: [
-      Center(child: Text('ENGLISH')),
-      Center(child: Text('FRENCH'))
-    ]));
+    children_table.add(TableRow(
+        children: [Center(child: Text(learn)), Center(child: Text(speak))]));
     for (var i = 0; i < en_words[index].length; i++) {
       children_table.add(TableRow(children: [
         Center(child: Text(en_words[index][i])),
@@ -137,7 +138,7 @@ class _AccountState extends State<Account> {
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
               title: Row(children: [
-            Text('Mes mots'),
+            Text('My words'),
             Expanded(child: Container()),
             appLogo
           ])),
@@ -156,8 +157,7 @@ class _AccountState extends State<Account> {
                           ((index == 0) & display) ? Colors.green : Colors.blue,
                     ),
                     onPressed: _pushLearning,
-                    child: Text(
-                        'Mots en cours d\'apprentissage: $nb_mot_learning')),
+                    child: Text('Words being learned: $nb_mot_learning')),
               if (!popup)
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -165,7 +165,7 @@ class _AccountState extends State<Account> {
                           ((index == 1) & display) ? Colors.green : Colors.blue,
                     ),
                     onPressed: _pushLearned,
-                    child: Text('Mots appris: $nb_mot_learned')),
+                    child: Text('Words learned: $nb_mot_learned')),
 
               // ElevatedButton(
               //     onPressed: null, child: Text('Mots refusés: $nb_mot_declined')),
@@ -182,20 +182,20 @@ class _AccountState extends State<Account> {
                       primary: Colors.orange.shade300,
                     ),
                     onPressed: _pushReset,
-                    child: Text('Réapprendre tous mes mots')),
+                    child: Text('Relearn all my words')),
               if (popup)
                 AlertDialog(
-                  title: Text("Êtes-vous sûrs ?"),
+                  title: Text("Are you sure ?"),
                   content: Text(
-                      "Cela déplacera tous les mots dans la catégorie \"Appris\" dans la catégorie \"En cours d'apprentissage\"."),
+                      "It will move every words of the category \"Learned\" in the category \"Words being learned\"."),
                   actions: [
                     Row(children: [
                       TextButton(
-                        child: Text("Oui"),
+                        child: Text("Yes"),
                         onPressed: _pushYes,
                       ),
                       TextButton(
-                        child: Text("Non"),
+                        child: Text("No"),
                         onPressed: _pushReset,
                       ),
                     ])

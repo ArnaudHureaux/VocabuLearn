@@ -24,6 +24,8 @@ class _PayState extends State<Pay> {
 //settings
   late List<String> liste_settings = import_setting_sync(folderPath);
   late int nb_words_max = int.parse(liste_settings[15]);
+  late String speak = liste_settings[19];
+  late String learn = liste_settings[21];
 //prix et nb de mots
   List<String> prices = ['\$2', '\$3,50', '\$5', '\$7', '\$10'];
   List<String> nb_bought = ['100', '200', '300', '500', '1000'];
@@ -44,7 +46,7 @@ class _PayState extends State<Pay> {
 
   Future<bool> _willPopCallback() async {
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Home()));
+        context, MaterialPageRoute(builder: (context) => Home(speak, learn)));
     return true; // return true if the route to be popped
   }
 
