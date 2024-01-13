@@ -20,7 +20,10 @@ class Paire extends StatefulWidget {
 
 class _PaireState extends State<Paire> {
   final folderPath;
-  _PaireState(this.folderPath);
+  _PaireState(this.folderPath) {
+    print(
+        "2_1_paire liste_settings ${liste_settings.length}, Accessing index: 19 & 21");
+  }
   //settings
   //settings
   // late List<String> liste_settings = import_setting_sync(folderPath);
@@ -210,6 +213,9 @@ class _PaireState extends State<Paire> {
             child: Card(
                 margin: EdgeInsets.all(0.0),
                 elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
                 color: is_red ? Colors.red : Colors.white,
                 child: Text(
                   'Lifes: $life_point',
@@ -224,10 +230,17 @@ class _PaireState extends State<Paire> {
         width: width + 25,
         child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              primary: Colors.orange,
-            ),
+                primary: Colors.orange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                )),
             onPressed: go_to_quizz,
-            child: Text('Skip'))));
+            child: Text(
+              'Skip',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ))));
     last_element.add(SizedBox(height: height, width: width, child: null));
 
     for (var j = 0; j < 3; j++) {
@@ -241,6 +254,9 @@ class _PaireState extends State<Paire> {
             width: 90,
             child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
                   primary: green[l]
                       ? Colors.green
                       : is_english[l]
@@ -249,7 +265,10 @@ class _PaireState extends State<Paire> {
                   padding: EdgeInsets.all(4),
                 ),
                 onPressed: () => onPressed(l),
-                child: Text(sub_shuffle[l])),
+                child: Text(sub_shuffle[l],
+                    style: TextStyle(
+                      color: Colors.white,
+                    ))),
           ));
         }
       }
@@ -269,9 +288,17 @@ class _PaireState extends State<Paire> {
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
-              //automaticallyImplyLeading: false,
+              backgroundColor: Colors.blue,
+              iconTheme: IconThemeData(
+                color: Colors.white,
+              ),
               title: Row(children: [
-                Text('1/4 Peer Group Game'),
+                Text(
+                  '1/4 Peer Group Game',
+                  style: TextStyle(
+                    color: Colors.white, // Set text color to black
+                  ),
+                ),
                 Expanded(child: Container()),
                 appLogo
               ]),

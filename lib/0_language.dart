@@ -139,8 +139,17 @@ class _LanguageState extends State<Language> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         //automaticallyImplyLeading: false,
+        backgroundColor: Colors.blue,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Row(children: [
-          Text('Select your language !'),
+          Text(
+            'Select your language !',
+            style: TextStyle(
+              color: Colors.white, // Set text color to black
+            ),
+          ),
           Expanded(child: Container()),
           appLogo
         ]),

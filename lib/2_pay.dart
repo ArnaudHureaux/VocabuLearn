@@ -62,9 +62,17 @@ class _PayState extends State<Pay> {
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
-              //automaticallyImplyLeading: false,
+              backgroundColor: Colors.blue,
+              iconTheme: IconThemeData(
+                color: Colors.white,
+              ),
               title: Row(children: [
-                Text('Get more words !'),
+                Text(
+                  'Get more words !',
+                  style: TextStyle(
+                    color: Colors.white, // Set text color to black
+                  ),
+                ),
                 Expanded(child: Container()),
                 appLogo
               ]),

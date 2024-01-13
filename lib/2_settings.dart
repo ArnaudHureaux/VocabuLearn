@@ -219,11 +219,20 @@ class _SettingsState extends State<Settings> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
+            backgroundColor: Colors.blue,
+            iconTheme: IconThemeData(
+              color: Colors.white,
+            ),
             title: Row(children: [
-          Text('My Settings'),
-          Expanded(child: Container()),
-          appLogo
-        ])),
+              Text(
+                'My Settings',
+                style: TextStyle(
+                  color: Colors.white, // Set text color to black
+                ),
+              ),
+              Expanded(child: Container()),
+              appLogo
+            ])),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,

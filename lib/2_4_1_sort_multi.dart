@@ -204,22 +204,30 @@ class _SortMultiState extends State<SortMulti> {
     for (var i = 0; i < 3; i++) {
       children_columns
           .add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        ElevatedButton(onPressed: functions[0][i], child: Text(texts[i])),
+        SizedBox(
+            width: 200, // Définissez la largeur souhaitée ici
+            child: (ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              )),
+              onPressed: functions[0][i],
+              child: Text(texts[i]),
+            ))),
         SizedBox(
             width: 30,
-            height: 36,
+            // height: 36,
             child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: ((index == i) & (display_info))
-                      ? Colors.green
-                      : Colors.blue,
-                  padding: EdgeInsets.zero,
-                ),
+                    primary: ((index == i) & (display_info))
+                        ? Colors.green
+                        : Colors.blue,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    )),
                 onPressed: (functions[1][i]),
-                child: Icon(
-                  Icons.info,
-                  size: 18.0,
-                ))),
+                child: Icon(Icons.info, size: 18.0, color: Colors.white))),
       ]));
     }
     Image appLogo = new Image(
@@ -232,11 +240,20 @@ class _SortMultiState extends State<SortMulti> {
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
+                backgroundColor: Colors.blue,
+                iconTheme: IconThemeData(
+                  color: Colors.white,
+                ),
                 title: Row(children: [
-              Text('Step 4/4: Sorting'),
-              Expanded(child: Container()),
-              appLogo
-            ])),
+                  Text(
+                    'Step 4/4: Sorting',
+                    style: TextStyle(
+                      color: Colors.white, // Set text color to black
+                    ),
+                  ),
+                  Expanded(child: Container()),
+                  appLogo
+                ])),
             body: SingleChildScrollView(
                 child: ConstrainedBox(
                     constraints: BoxConstraints(
@@ -293,10 +310,16 @@ class _SortMultiState extends State<SortMulti> {
                             ),
                           ElevatedButton(
                               style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
                                 primary: Colors.orange,
                               ),
                               onPressed: go_to_sort_one,
-                              child: Text('Sort word by word'))
+                              child: Text('Sort word by word',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  )))
                         ]))))));
   }
 }

@@ -357,9 +357,12 @@ class _HomeState extends State<Home> {
             width: width,
             child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    primary: Colors.blue,
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.all(10)),
+                  primary: Colors.blue,
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                ),
                 icon: Icon(
                   icons[i],
                   color: Colors.white,
@@ -379,8 +382,17 @@ class _HomeState extends State<Home> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.blue,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Row(children: [
-          Text('VocabuLearn'),
+          Text(
+            'VocabuLearn',
+            style: TextStyle(
+              color: Colors.white, // Set text color to black
+            ),
+          ),
           Expanded(child: Container()),
           appLogo
         ]),

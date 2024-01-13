@@ -236,19 +236,30 @@ class _SortOneState extends State<SortOne> {
     for (var i = 0; i < 3; i++) {
       children_columns
           .add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        ElevatedButton(onPressed: functions[0][i], child: Text(texts[i])),
         SizedBox(
-            width: 30,
-            height: 36,
+            width: 200, // Définissez la largeur souhaitée ici
             child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: index == i ? Colors.green : Colors.blue,
-                  padding: EdgeInsets.zero,
-                ),
+                    shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                )),
+                onPressed: functions[0][i],
+                child: Text(texts[i]))),
+        SizedBox(
+            width: 30,
+            // height: 36,
+            child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    primary: index == i ? Colors.green : Colors.blue,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    )),
                 onPressed: (functions[1][i]),
                 child: Icon(
                   Icons.info,
                   size: 18.0,
+                  color: Colors.white,
                 ))),
       ]));
     }
@@ -262,11 +273,20 @@ class _SortOneState extends State<SortOne> {
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
+                backgroundColor: Colors.blue,
+                iconTheme: IconThemeData(
+                  color: Colors.white,
+                ),
                 title: Row(children: [
-              Text('Step 4/4: Classification'),
-              Expanded(child: Container()),
-              appLogo
-            ])),
+                  Text(
+                    'Step 4/4: Sorting',
+                    style: TextStyle(
+                      color: Colors.white, // Set text color to black
+                    ),
+                  ),
+                  Expanded(child: Container()),
+                  appLogo
+                ])),
             body: SingleChildScrollView(
                 child: ConstrainedBox(
                     constraints: BoxConstraints(
@@ -288,7 +308,7 @@ class _SortOneState extends State<SortOne> {
                                   child: Center(
                                       child: (number < number_max)
                                           ? Text(
-                                              'What to do with this word ? (${number + 1}/$number_max)',
+                                              'How classify this word ? (${number + 1}/$number_max)',
                                               style: TextStyle(fontSize: 20),
                                             )
                                           : Text(
@@ -350,10 +370,15 @@ class _SortOneState extends State<SortOne> {
                             ),
                           ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                primary: Colors.orange,
-                              ),
+                                  primary: Colors.orange,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  )),
                               onPressed: go_to_sort_multi,
-                              child: Text('Sort by batch'))
+                              child: Text('Sort by batch',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  )))
                         ]))))));
   }
 }

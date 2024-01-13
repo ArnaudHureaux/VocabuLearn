@@ -137,11 +137,20 @@ class _AccountState extends State<Account> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
+              backgroundColor: Colors.blue,
+              iconTheme: IconThemeData(
+                color: Colors.white,
+              ),
               title: Row(children: [
-            Text('My words'),
-            Expanded(child: Container()),
-            appLogo
-          ])),
+                Text(
+                  'My words',
+                  style: TextStyle(
+                    color: Colors.white, // Set text color to black
+                  ),
+                ),
+                Expanded(child: Container()),
+                appLogo
+              ])),
           body: Scrollbar(
               child: SingleChildScrollView(
                   child: Center(

@@ -131,11 +131,16 @@ class _QuizzState extends State<Quizz> {
           width: 200,
           child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: is_red[i] ? Colors.red : Colors.blue,
-                padding: EdgeInsets.all(4),
-              ),
+                  primary: is_red[i] ? Colors.red : Colors.blue,
+                  padding: EdgeInsets.all(4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  )),
               onPressed: () => pushButton(i),
-              child: Text(quizz_words[index][i]))));
+              child: Text(quizz_words[index][i],
+                  style: TextStyle(
+                    color: Colors.white,
+                  )))));
     }
     Image appLogo = new Image(
         image: new ExactAssetImage("assets/VOCABULEARN_ICON.png"),
@@ -149,11 +154,20 @@ class _QuizzState extends State<Quizz> {
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
                 //automaticallyImplyLeading: false,
+                backgroundColor: Colors.blue,
+                iconTheme: IconThemeData(
+                  color: Colors.white,
+                ),
                 title: Row(children: [
-              Text('2/4 Quizz Game'),
-              Expanded(child: Container()),
-              appLogo
-            ])),
+                  Text(
+                    '2/4 Quizz Game',
+                    style: TextStyle(
+                      color: Colors.white, // Set text color to black
+                    ),
+                  ),
+                  Expanded(child: Container()),
+                  appLogo
+                ])),
             body: SingleChildScrollView(
                 child: ConstrainedBox(
                     constraints: BoxConstraints(
@@ -176,16 +190,22 @@ class _QuizzState extends State<Quizz> {
                               child: Center(
                                   child: Text(
                                 sub_speak_learning[index],
-                                style: TextStyle(fontSize: 25),
+                                style: TextStyle(
+                                    fontSize: 25, color: Colors.black),
                               )),
                             )),
                         ...children_buttons,
                         ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              primary: Colors.orange,
-                            ),
+                                primary: Colors.orange,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                )),
                             onPressed: go_to_fuzzy,
-                            child: Text('Skip'))
+                            child: Text('Skip',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                )))
                       ],
                     ))))));
   }

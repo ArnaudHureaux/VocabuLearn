@@ -159,11 +159,20 @@ class _FuzzyState extends State<Fuzzy> {
             resizeToAvoidBottomInset: false,
             appBar: AppBar(
                 //automaticallyImplyLeading: false,
+                backgroundColor: Colors.blue,
+                iconTheme: IconThemeData(
+                  color: Colors.white,
+                ),
                 title: Row(children: [
-              Text('3/4 Direct Translation'),
-              Expanded(child: Container()),
-              appLogo
-            ])),
+                  Text(
+                    '3/4 Direct Translation',
+                    style: TextStyle(
+                      color: Colors.white, // Set text color to black
+                    ),
+                  ),
+                  Expanded(child: Container()),
+                  appLogo
+                ])),
             body: SingleChildScrollView(
                 child: ConstrainedBox(
                     constraints: BoxConstraints(
@@ -197,6 +206,10 @@ class _FuzzyState extends State<Fuzzy> {
                           if (text) Text(text_fail),
                           if (spoil)
                             ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                )),
                                 onPressed: _spoilPush,
                                 child: Text('See the answer')),
                           if (sucess) Text(text_sucess),
@@ -217,10 +230,15 @@ class _FuzzyState extends State<Fuzzy> {
                           SizedBox(height: 200),
                           ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                primary: Colors.orange,
-                              ),
+                                  primary: Colors.orange,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  )),
                               onPressed: go_to_sort,
-                              child: Text('Skip'))
+                              child: Text('Skip',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  )))
                         ]))))));
   }
 }

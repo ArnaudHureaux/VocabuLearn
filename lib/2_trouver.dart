@@ -264,8 +264,12 @@ class _TrouverState extends State<Trouver> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
+            backgroundColor: Colors.blue,
             title: Row(children: [
-              Text('Words selection !'),
+              Text('Words selection !',
+                  style: TextStyle(
+                    color: Colors.white, // Set text color to black
+                  )),
               Expanded(child: Container()),
               appLogo
             ]),

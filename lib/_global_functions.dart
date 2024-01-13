@@ -25,7 +25,7 @@ create_setting() async {
     await file.writeAsString(default_values);
   } else {
     List<String> content_list = lines[0].split(',');
-    if (content_list.length < 16) {
+    if (content_list.length < 22) {
       await file.writeAsString(default_values);
     }
   }
@@ -41,7 +41,7 @@ import_setting_async() async {
     file.writeAsString(content_str);
     return content_str.split(',');
   }
-  if ((lines.length > 0) & (lines[0].split(',').length < 17)) {
+  if ((lines.length > 0) & (lines[0].split(',').length < 22)) {
     String content_str = get_default_settings();
     file.writeAsString(content_str);
     return content_str.split(',');
@@ -117,27 +117,7 @@ import_setting_sync(folderPath) {
     file.writeAsString(content_str);
     return content_str.split(',');
   }
-  if ((lines.length > 0) & (lines[0].split(',').length < 17)) {
-    String content_str = get_default_settings();
-    file.writeAsString(content_str);
-    return content_str.split(',');
-  } else {
-    List<String> content_list = lines[0].split(',');
-    return content_list;
-  }
-}
-
-import_setting_async2() async {
-  final folder = await getApplicationDocumentsDirectory();
-  final folderPath = folder.path;
-  final file = File('$folderPath/settings.txt');
-  List<String> lines = file.readAsLinesSync();
-  if (lines.length == 0) {
-    String content_str = get_default_settings();
-    file.writeAsString(content_str);
-    return content_str.split(',');
-  }
-  if ((lines.length > 0) & (lines[0].split(',').length < 17)) {
+  if ((lines.length > 0) & (lines[0].split(',').length < 22)) {
     String content_str = get_default_settings();
     file.writeAsString(content_str);
     return content_str.split(',');
