@@ -36,8 +36,7 @@ def csv():
         if ((inputs['speak'] not in langues) | (inputs['learn'] not in langues)):
             return 'Les langues sélectionnés doivent appartenir à :'+str(langues)
         else:
-            data_path = data_path = 'dataset/' + \
-                inputs['learn']+'/'+inputs['learn']+'_'+inputs['speak']+'.csv'
+            data_path = 'dataset/' + inputs['learn']+'/'+inputs['learn']+'_'+inputs['speak']+'.csv'
             df = import_data(bucket_name, data_path)
             return str(df.to_dict())
 
